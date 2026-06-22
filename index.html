@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#090b1f" />
+    <meta
+      name="description"
+      content="An interactive triangle solver using the Laws of Sines and Cosines."
+    />
+    <title>Triangle Solver</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <main class="app-shell">
+      <header class="hero">
+        <a class="brand" href="#" aria-label="Triangle Solver home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 42 38">
+              <path d="M21 3 39 34H3L21 3Z" />
+              <circle cx="21" cy="3" r="2.8" />
+              <circle cx="39" cy="34" r="2.8" />
+              <circle cx="3" cy="34" r="2.8" />
+            </svg>
+          </span>
+          <span>TRIANGLE LAB</span>
+        </a>
+        <div class="hero-copy">
+          <p class="eyebrow">Interactive Geometry Tool</p>
+          <h1>Every triangle has a <span>solution.</span></h1>
+          <p class="subtitle">
+            Enter any three known values—including at least one side—and watch the
+            triangle take shape.
+          </p>
+        </div>
+        <div class="rule-pills" aria-label="Supported triangle cases">
+          <span>SSS</span><span>SAS</span><span>ASA</span><span>AAS</span><span>SSA</span>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <article class="panel input-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">01 / GIVEN VALUES</p>
+              <h2>What do you know?</h2>
+            </div>
+            <button class="text-button" id="clearButton" type="button">
+              <span aria-hidden="true">↻</span> Reset
+            </button>
+          </div>
+
+          <p class="instruction">
+            Fill exactly three fields. Sides must be positive and angles must be
+            between 0° and 180°.
+          </p>
+
+          <form id="triangleForm" novalidate>
+            <fieldset>
+              <legend>Side lengths</legend>
+              <div class="field-grid">
+                <label class="field">
+                  <span><b>a</b><small>opposite ∠A</small></span>
+                  <div class="input-wrap">
+                    <input id="sideA" name="a" type="number" min="0" step="any" inputmode="decimal" placeholder="—" />
+                    <span>units</span>
+                  </div>
+                </label>
+                <label class="field">
+                  <span><b>b</b><small>opposite ∠B</small></span>
+                  <div class="input-wrap">
+                    <input id="sideB" name="b" type="number" min="0" step="any" inputmode="decimal" placeholder="—" />
+                    <span>units</span>
+                  </div>
+                </label>
+                <label class="field">
+                  <span><b>c</b><small>opposite ∠C</small></span>
+                  <div class="input-wrap">
+                    <input id="sideC" name="c" type="number" min="0" step="any" inputmode="decimal" placeholder="—" />
+                    <span>units</span>
+                  </div>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="form-divider"><span>AND / OR</span></div>
+
+            <fieldset>
+              <legend>Angle measures</legend>
+              <div class="field-grid">
+                <label class="field">
+                  <span><b>A</b><small>at vertex A</small></span>
+                  <div class="input-wrap angle">
+                    <input id="angleA" name="A" type="number" min="0" max="180" step="any" inputmode="decimal" placeholder="—" />
+                    <span>degrees</span>
+                  </div>
+                </label>
+                <label class="field">
+                  <span><b>B</b><small>at vertex B</small></span>
+                  <div class="input-wrap angle">
+                    <input id="angleB" name="B" type="number" min="0" max="180" step="any" inputmode="decimal" placeholder="—" />
+                    <span>degrees</span>
+                  </div>
+                </label>
+                <label class="field">
+                  <span><b>C</b><small>at vertex C</small></span>
+                  <div class="input-wrap angle">
+                    <input id="angleC" name="C" type="number" min="0" max="180" step="any" inputmode="decimal" placeholder="—" />
+                    <span>degrees</span>
+                  </div>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="form-message" id="formMessage" role="alert" aria-live="polite"></div>
+
+            <button class="solve-button" type="submit">
+              <span>Solve the triangle</span>
+              <span class="button-arrow" aria-hidden="true">→</span>
+            </button>
+          </form>
+        </article>
+
+        <article class="panel visual-panel">
+          <div class="panel-heading visual-heading">
+            <div>
+              <p class="kicker">02 / VISUALIZATION</p>
+              <h2>Your triangle</h2>
+            </div>
+            <span class="status-badge" id="statusBadge"><i></i> Waiting for values</span>
+          </div>
+
+          <div class="triangle-stage" id="triangleStage">
+            <svg id="triangleSvg" viewBox="0 0 600 410" role="img" aria-labelledby="diagramTitle diagramDesc">
+              <title id="diagramTitle">Triangle diagram</title>
+              <desc id="diagramDesc">A preview triangle awaiting values.</desc>
+              <defs>
+                <linearGradient id="triangleFill" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#7c5cff" stop-opacity=".38" />
+                  <stop offset=".55" stop-color="#2ed8ff" stop-opacity=".17" />
+                  <stop offset="1" stop-color="#11e6ad" stop-opacity=".27" />
+                </linearGradient>
+                <linearGradient id="triangleStroke" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#9b87ff" />
+                  <stop offset=".5" stop-color="#50ddff" />
+                  <stop offset="1" stop-color="#29e8b5" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                  <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
+              <g class="grid-lines">
+                <path d="M45 355H555M45 285H555M45 215H555M45 145H555M45 75H555" />
+                <path d="M95 35V375M195 35V375M295 35V375M395 35V375M495 35V375" />
+              </g>
+              <g id="triangleGraphic">
+                <polygon id="trianglePolygon" points="122,340 492,340 335,90" />
+                <g class="angle-arcs" id="angleArcs"></g>
+                <g class="vertices">
+                  <circle id="vertexA" cx="122" cy="340" r="6" />
+                  <circle id="vertexB" cx="492" cy="340" r="6" />
+                  <circle id="vertexC" cx="335" cy="90" r="6" />
+                </g>
+                <g class="diagram-labels" id="diagramLabels"></g>
+              </g>
+            </svg>
+            <p class="stage-prompt" id="stagePrompt">
+              <span class="prompt-icon">△</span>
+              Your solved triangle will appear here
+            </p>
+          </div>
+
+          <div class="results-section" id="resultsSection" aria-live="polite">
+            <div class="empty-results">
+              <div>
+                <span>3</span>
+                <p>known values</p>
+              </div>
+              <b>+</b>
+              <div>
+                <span>1</span>
+                <p>side minimum</p>
+              </div>
+              <b>=</b>
+              <div class="accent">
+                <span>△</span>
+                <p>complete triangle</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="learn-strip">
+        <div>
+          <p class="kicker">THE MATH BEHIND IT</p>
+          <h2>Two laws. Infinite triangles.</h2>
+        </div>
+        <div class="formula-card">
+          <span>LAW OF SINES</span>
+          <p><i>a</i> / sin A = <i>b</i> / sin B = <i>c</i> / sin C</p>
+        </div>
+        <div class="formula-card">
+          <span>LAW OF COSINES</span>
+          <p><i>c</i>² = <i>a</i>² + <i>b</i>² − 2<i>ab</i> cos C</p>
+        </div>
+      </section>
+
+      <footer>
+        <span>TRIANGLE LAB</span>
+        <p>Built for curious minds and stubborn homework.</p>
+      </footer>
+    </main>
+
+    <script defer src="./src/main.js"></script>
+  </body>
+</html>
