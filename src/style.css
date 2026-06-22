@@ -440,8 +440,19 @@ legend {
 .result-card span { display: block; color: #697294; font-size: .57rem; letter-spacing: .08em; text-transform: uppercase; }
 .result-card strong { display: block; margin-top: 5px; color: #edf0ff; font-family: "Space Grotesk"; font-size: 1rem; }
 .result-card strong em { color: #7881a2; font-size: .58rem; font-style: normal; font-weight: 500; }
-.result-card.highlight { border-color: rgba(36,225,173,.24); }
-.result-card.highlight strong { color: var(--mint); }
+.result-card.calculated {
+  border-color: rgba(61, 220, 255, .34);
+  background:
+    linear-gradient(135deg, rgba(139, 108, 255, .11), rgba(61, 220, 255, .07)),
+    rgba(5, 7, 23, .58);
+  box-shadow: inset 0 0 20px rgba(61, 220, 255, .025);
+}
+.result-card.calculated span { color: #8d98c5; }
+.result-card.calculated strong { color: var(--cyan); }
+.result-card.calculated:nth-last-child(-n + 2) {
+  border-color: rgba(36, 225, 173, .3);
+}
+.result-card.calculated:nth-last-child(-n + 2) strong { color: var(--mint); }
 .method-line { margin: 13px 0 0; color: #7d86a8; font-size: .66rem; }
 .method-line b { color: var(--purple); }
 

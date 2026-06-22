@@ -345,8 +345,9 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
   triangleStage.classList.add("solved");
 }
 
-function renderResults(solutions, activeIndex = 0) {
+function renderResults(solutions, activeIndex = 0, givenKeys = []) {
   const solution = solutions[activeIndex];
+  const given = new Set(givenKeys);
   const tabs = solutions.length > 1
     ? `<div class="solution-tabs">${solutions.map((_, index) =>
         `<button class="solution-tab ${index === activeIndex ? "active" : ""}" data-solution="${index}">
@@ -355,19 +356,19 @@ function renderResults(solutions, activeIndex = 0) {
     : "";
 
   const cards = [
-    ["Side a", solution.a, "units"],
-    ["Side b", solution.b, "units"],
-    ["Side c", solution.c, "units"],
-    ["Angle A", solution.A, "°"],
-    ["Angle B", solution.B, "°"],
-    ["Angle C", solution.C, "°"],
-    ["Area", solution.area, "units²", "highlight"],
-    ["Perimeter", solution.perimeter, "units", "highlight"]
+    ["a", "Side a", solution.a, "units"],
+    ["b", "Side b", solution.b, "units"],
+    ["c", "Side c", solution.c, "units"],
+    ["A", "Angle A", solution.A, "°"],
+    ["B", "Angle B", solution.B, "°"],
+    ["C", "Angle C", solution.C, "°"],
+    ["area", "Area", solution.area, "units²"],
+    ["perimeter", "Perimeter", solution.perimeter, "units"]
   ];
 
   resultsSection.innerHTML = `${tabs}<div class="result-grid">
-    ${cards.map(([label, value, unit, className = ""]) =>
-      `<div class="result-card ${className}">
+    ${cards.map(([key, label, value, unit]) =>
+      `<div class="result-card ${given.has(key) ? "given" : "calculated"}">
         <span>${label}</span><strong>${formatNumber(value)} <em>${unit}</em></strong>
       </div>`).join("")}
     </div>
@@ -378,7 +379,7 @@ function renderResults(solutions, activeIndex = 0) {
   resultsSection.querySelectorAll("[data-solution]").forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.solution);
-      renderResults(solutions, index);
+      renderResults(solutions, index, givenKeys);
     });
   });
   renderDiagram(solutions[0], solutions[1] || null, activeIndex);
@@ -425,7 +426,10 @@ form.addEventListener("submit", (event) => {
   }
   try {
     const solutions = solveTriangle(values);
-    renderResults(solutions);
+    const givenKeys = Object.entries(values)
+      .filter(([, value]) => value !== null)
+      .map(([key]) => key);
+    renderResults(solutions, 0, givenKeys);
     statusBadge.classList.add("solved");
     statusBadge.innerHTML = `<i></i> ${solutions.length > 1 ? "2 solutions found" : "Triangle solved"}`;
   } catch (solveError) {
