@@ -9,6 +9,7 @@ const alternateTriangle = document.querySelector("#alternateTriangle");
 const alternatePolygon = document.querySelector("#alternatePolygon");
 const alternateVertex = document.querySelector("#alternateVertex");
 const alternateLabel = document.querySelector("#alternateLabel");
+const alternateSideLabel = document.querySelector("#alternateSideLabel");
 const ambiguousAltitude = document.querySelector("#ambiguousAltitude");
 const altitudeLine = document.querySelector("#altitudeLine");
 const altitudeLabel = document.querySelector("#altitudeLabel");
@@ -241,6 +242,7 @@ function ambiguousCoordinates(primary, alternate) {
     movingVertex,
     fixedVertex,
     angleVertex,
+    varyingSide,
     altitudeExpression: `${fixedAdjacentSide} sin ${angleKey}`
   };
 }
@@ -271,7 +273,7 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
     const dy = point.y - centroid.y;
     const mag = Math.hypot(dx, dy) || 1;
     labels.append(svgText(
-      `${key}  ${formatNumber(solution[key])}°`,
+      `${ambiguous && key === ambiguous.movingVertex ? `${key}₁` : key}  ${formatNumber(solution[key])}°`,
       point.x + (dx / mag) * 43,
       point.y + (dy / mag) * 34 + 5
     ));
@@ -288,7 +290,7 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
     const dy = mid.y - centroid.y;
     const mag = Math.hypot(dx, dy) || 1;
     labels.append(svgText(
-      `${key} = ${formatNumber(solution[key])}`,
+      `${ambiguous && key === ambiguous.varyingSide ? `${key}₁` : key} = ${formatNumber(solution[key])}`,
       mid.x + (dx/mag)*19,
       mid.y + (dy/mag)*19 + 4,
       "side-label"
@@ -313,13 +315,17 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
     altitudeLabel.setAttribute("y", (fixedPoint.y + baselineY) / 2);
     altitudeLabel.textContent = `h = ${ambiguous.altitudeExpression}`;
     ambiguousAltitude.classList.add("visible");
-    const alternateCentroid = {
-      x: (alternate.A.x + alternate.B.x + alternate.C.x) / 3,
-      y: (alternate.A.y + alternate.B.y + alternate.C.y) / 3
-    };
-    alternateLabel.textContent = activeIndex === 1 ? "Solution 2 selected" : "Solution 2";
-    alternateLabel.setAttribute("x", alternateCentroid.x);
-    alternateLabel.setAttribute("y", alternateCentroid.y + 4);
+    const alternateMovingPoint = alternate[ambiguous.movingVertex];
+    const alternateAngle = alternateSolution[ambiguous.movingVertex];
+    alternateLabel.textContent =
+      `${ambiguous.movingVertex}₂  ${formatNumber(alternateAngle)}°`;
+    alternateLabel.setAttribute("x", alternateMovingPoint.x);
+    alternateLabel.setAttribute("y", alternateMovingPoint.y + 31);
+    const baseStart = alternate[ambiguous.angleVertex];
+    alternateSideLabel.textContent =
+      `${ambiguous.varyingSide}₂ = ${formatNumber(alternateSolution[ambiguous.varyingSide])}`;
+    alternateSideLabel.setAttribute("x", (baseStart.x + alternateMovingPoint.x) / 2);
+    alternateSideLabel.setAttribute("y", baseStart.y + 18);
     alternateTriangle.classList.add("visible");
     alternateTriangle.classList.toggle("selected", activeIndex === 1);
   } else {
@@ -328,6 +334,8 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
     alternatePolygon.setAttribute("points", "");
     alternateVertex.setAttribute("cx", 0);
     alternateVertex.setAttribute("cy", 0);
+    alternateLabel.textContent = "";
+    alternateSideLabel.textContent = "";
   }
 
   diagramDesc.textContent =
@@ -392,6 +400,8 @@ function resetApp() {
   alternatePolygon.setAttribute("points", "");
   alternateVertex.setAttribute("cx", 0);
   alternateVertex.setAttribute("cy", 0);
+  alternateLabel.textContent = "";
+  alternateSideLabel.textContent = "";
   polygon.classList.remove("deemphasized");
   labels.classList.remove("deemphasized");
   const defaults = [[122,340], [492,340], [335,90]];
