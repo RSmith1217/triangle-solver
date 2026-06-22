@@ -9,6 +9,9 @@ const alternateTriangle = document.querySelector("#alternateTriangle");
 const alternatePolygon = document.querySelector("#alternatePolygon");
 const alternateVertex = document.querySelector("#alternateVertex");
 const alternateLabel = document.querySelector("#alternateLabel");
+const ambiguousAltitude = document.querySelector("#ambiguousAltitude");
+const altitudeLine = document.querySelector("#altitudeLine");
+const altitudeLabel = document.querySelector("#altitudeLabel");
 const angleArcs = document.querySelector("#angleArcs");
 const labels = document.querySelector("#diagramLabels");
 const diagramDesc = document.querySelector("#diagramDesc");
@@ -207,10 +210,10 @@ function ambiguousCoordinates(primary, alternate) {
   const fixedVertex = varyingSide.toUpperCase();
   const raw = (solution) => ({
     [angleVertex]: { x: 0, y: 0 },
-    [fixedVertex]: { x: solution[fixedAdjacentSide], y: 0 },
-    [movingVertex]: {
-      x: solution[varyingSide] * Math.cos(toRad(solution[angleKey])),
-      y: solution[varyingSide] * Math.sin(toRad(solution[angleKey]))
+    [movingVertex]: { x: solution[varyingSide], y: 0 },
+    [fixedVertex]: {
+      x: solution[fixedAdjacentSide] * Math.cos(toRad(solution[angleKey])),
+      y: solution[fixedAdjacentSide] * Math.sin(toRad(solution[angleKey]))
     }
   });
 
@@ -235,7 +238,10 @@ function ambiguousCoordinates(primary, alternate) {
   return {
     primary: fit(primaryRaw),
     alternate: fit(alternateRaw),
-    movingVertex
+    movingVertex,
+    fixedVertex,
+    angleVertex,
+    altitudeExpression: `${fixedAdjacentSide} sin ${angleKey}`
   };
 }
 
@@ -297,6 +303,16 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
     );
     alternateVertex.setAttribute("cx", alternate[ambiguous.movingVertex].x);
     alternateVertex.setAttribute("cy", alternate[ambiguous.movingVertex].y);
+    const fixedPoint = p[ambiguous.fixedVertex];
+    const baselineY = p[ambiguous.angleVertex].y;
+    altitudeLine.setAttribute("x1", fixedPoint.x);
+    altitudeLine.setAttribute("y1", fixedPoint.y);
+    altitudeLine.setAttribute("x2", fixedPoint.x);
+    altitudeLine.setAttribute("y2", baselineY);
+    altitudeLabel.setAttribute("x", fixedPoint.x + 8);
+    altitudeLabel.setAttribute("y", (fixedPoint.y + baselineY) / 2);
+    altitudeLabel.textContent = `h = ${ambiguous.altitudeExpression}`;
+    ambiguousAltitude.classList.add("visible");
     const alternateCentroid = {
       x: (alternate.A.x + alternate.B.x + alternate.C.x) / 3,
       y: (alternate.A.y + alternate.B.y + alternate.C.y) / 3
@@ -308,6 +324,7 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
     alternateTriangle.classList.toggle("selected", activeIndex === 1);
   } else {
     alternateTriangle.classList.remove("visible", "selected");
+    ambiguousAltitude.classList.remove("visible");
     alternatePolygon.setAttribute("points", "");
     alternateVertex.setAttribute("cx", 0);
     alternateVertex.setAttribute("cy", 0);
@@ -371,6 +388,7 @@ function resetApp() {
   statusBadge.innerHTML = "<i></i> Waiting for values";
   triangleStage.classList.remove("solved");
   alternateTriangle.classList.remove("visible", "selected");
+  ambiguousAltitude.classList.remove("visible");
   alternatePolygon.setAttribute("points", "");
   alternateVertex.setAttribute("cx", 0);
   alternateVertex.setAttribute("cy", 0);

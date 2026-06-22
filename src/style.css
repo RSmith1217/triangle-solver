@@ -308,6 +308,27 @@ legend {
   transition: points .7s cubic-bezier(.22,.8,.24,1);
 }
 #trianglePolygon.deemphasized { opacity: .42; }
+.ambiguous-altitude {
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.ambiguous-altitude.visible { opacity: 1; }
+#altitudeLine {
+  stroke: rgba(255, 255, 255, .38);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 6;
+  vector-effect: non-scaling-stroke;
+}
+#altitudeLabel {
+  fill: #9ca6cc;
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: #090b20;
+  stroke-width: 4px;
+  text-anchor: start;
+}
 .alternate-triangle {
   opacity: 0;
   transition: opacity .35s ease;
