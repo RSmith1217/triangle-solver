@@ -16,6 +16,14 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./src/style.css" />
+    <script>
+      window.MathJax = {
+        svg: {
+          fontCache: "global"
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
   </head>
   <body>
     <div class="ambient ambient-one"></div>
@@ -212,11 +220,11 @@
         </div>
         <div class="formula-card">
           <span>LAW OF SINES</span>
-          <p><i>a</i> / sin A = <i>b</i> / sin B = <i>c</i> / sin C</p>
+          <p>\(\displaystyle \frac{\sin A}{a}=\frac{\sin B}{b}=\frac{\sin C}{c}\)</p>
         </div>
         <div class="formula-card">
           <span>LAW OF COSINES</span>
-          <p><i>c</i>² = <i>a</i>² + <i>b</i>² − 2<i>ab</i> cos C</p>
+          <p>\(\displaystyle c^2=a^2+b^2-2ab\cos C\)</p>
         </div>
       </section>
 

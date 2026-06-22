@@ -425,7 +425,18 @@ legend {
 }
 .formula-card:last-child { border-left-color: var(--cyan); background: linear-gradient(90deg, rgba(61,220,255,.07), transparent); }
 .formula-card span { color: #7982a4; font-size: .6rem; font-weight: 700; letter-spacing: .13em; }
-.formula-card p { margin: 7px 0 0; color: #dce0f6; font-family: Georgia, serif; font-size: clamp(.9rem, 1.3vw, 1.1rem); }
+.formula-card p {
+  min-height: 32px;
+  margin: 9px 0 0;
+  color: #dce0f6;
+  font-size: clamp(.92rem, 1.3vw, 1.1rem);
+  line-height: 1.5;
+}
+.formula-card mjx-container {
+  margin: 0 !important;
+  color: #eef1ff;
+}
+.formula-card mjx-container svg { overflow: visible; }
 
 footer { display: flex; padding: 24px 2px 36px; justify-content: space-between; color: #555e80; font-size: .65rem; }
 footer span { font-family: "Space Grotesk"; font-weight: 700; letter-spacing: .15em; }
