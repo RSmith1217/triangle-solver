@@ -307,6 +307,40 @@ legend {
   vector-effect: non-scaling-stroke;
   transition: points .7s cubic-bezier(.22,.8,.24,1);
 }
+#trianglePolygon.deemphasized { opacity: .42; }
+.alternate-triangle {
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.alternate-triangle.visible { opacity: 1; }
+.alternate-triangle.selected #alternatePolygon {
+  fill: rgba(139, 108, 255, .24);
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 11px rgba(139, 108, 255, .85));
+}
+.alternate-triangle.selected #alternateLabel { fill: #ded6ff; }
+#alternatePolygon {
+  fill: rgba(139, 108, 255, .09);
+  stroke: #ad94ff;
+  stroke-width: 2.25;
+  stroke-dasharray: 9 7;
+  filter: drop-shadow(0 0 7px rgba(139, 108, 255, .45));
+  vector-effect: non-scaling-stroke;
+  transition: points .7s cubic-bezier(.22,.8,.24,1);
+}
+#alternateLabel {
+  fill: #c3b5ff;
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  paint-order: stroke;
+  stroke: #090b20;
+  stroke-width: 5px;
+  text-anchor: middle;
+  text-transform: uppercase;
+  transition: x .7s, y .7s;
+}
 .vertices circle { fill: #090b20; stroke: var(--cyan); stroke-width: 3; filter: url(#glow); transition: cx .7s, cy .7s; }
 .diagram-labels text {
   fill: #eef1ff;
@@ -318,6 +352,7 @@ legend {
   stroke-width: 5px;
   stroke-linejoin: round;
 }
+.diagram-labels.deemphasized { opacity: .42; }
 .diagram-labels .side-label { fill: var(--cyan); font-size: 13px; }
 .angle-arcs path { fill: none; stroke: rgba(155,135,255,.8); stroke-width: 2; }
 .stage-prompt {

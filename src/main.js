@@ -5,6 +5,9 @@ const resultsSection = document.querySelector("#resultsSection");
 const statusBadge = document.querySelector("#statusBadge");
 const triangleStage = document.querySelector("#triangleStage");
 const polygon = document.querySelector("#trianglePolygon");
+const alternateTriangle = document.querySelector("#alternateTriangle");
+const alternatePolygon = document.querySelector("#alternatePolygon");
+const alternateLabel = document.querySelector("#alternateLabel");
 const angleArcs = document.querySelector("#angleArcs");
 const labels = document.querySelector("#diagramLabels");
 const diagramDesc = document.querySelector("#diagramDesc");
@@ -187,9 +190,49 @@ function svgText(text, x, y, className = "") {
   return node;
 }
 
-function renderDiagram(solution) {
+function nestedCoordinates(solution, primaryPoints) {
+  const points = triangleCoordinates(solution);
+  const primaryCentroid = {
+    x: (primaryPoints.A.x + primaryPoints.B.x + primaryPoints.C.x) / 3,
+    y: (primaryPoints.A.y + primaryPoints.B.y + primaryPoints.C.y) / 3
+  };
+  const ownCentroid = {
+    x: (points.A.x + points.B.x + points.C.x) / 3,
+    y: (points.A.y + points.B.y + points.C.y) / 3
+  };
+
+  const isInside = (point) => {
+    const { A, B, C } = primaryPoints;
+    const denominator = (B.y - C.y) * (A.x - C.x) + (C.x - B.x) * (A.y - C.y);
+    const alpha = ((B.y - C.y) * (point.x - C.x) + (C.x - B.x) * (point.y - C.y)) / denominator;
+    const beta = ((C.y - A.y) * (point.x - C.x) + (A.x - C.x) * (point.y - C.y)) / denominator;
+    const gamma = 1 - alpha - beta;
+    const margin = .035;
+    return alpha >= margin && beta >= margin && gamma >= margin;
+  };
+
+  const scaledPoints = (scale) => Object.fromEntries(
+    Object.entries(points).map(([key, point]) => [
+      key,
+      {
+        x: primaryCentroid.x + (point.x - ownCentroid.x) * scale,
+        y: primaryCentroid.y + (point.y - ownCentroid.y) * scale
+      }
+    ])
+  );
+
+  for (let scale = .58; scale >= .12; scale -= .02) {
+    const candidate = scaledPoints(scale);
+    if (Object.values(candidate).every(isInside)) return candidate;
+  }
+  return scaledPoints(.1);
+}
+
+function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
   const p = triangleCoordinates(solution);
   polygon.setAttribute("points", `${p.A.x},${p.A.y} ${p.B.x},${p.B.y} ${p.C.x},${p.C.y}`);
+  polygon.classList.toggle("deemphasized", activeIndex === 1);
+  labels.classList.toggle("deemphasized", activeIndex === 1);
   [p.A, p.B, p.C].forEach((point, index) => {
     vertices[index].setAttribute("cx", point.x);
     vertices[index].setAttribute("cy", point.y);
@@ -232,8 +275,30 @@ function renderDiagram(solution) {
     ));
   });
 
+  if (alternateSolution) {
+    const alternate = nestedCoordinates(alternateSolution, p);
+    alternatePolygon.setAttribute(
+      "points",
+      `${alternate.A.x},${alternate.A.y} ${alternate.B.x},${alternate.B.y} ${alternate.C.x},${alternate.C.y}`
+    );
+    const alternateCentroid = {
+      x: (alternate.A.x + alternate.B.x + alternate.C.x) / 3,
+      y: (alternate.A.y + alternate.B.y + alternate.C.y) / 3
+    };
+    alternateLabel.textContent = activeIndex === 1 ? "Solution 2 selected" : "Solution 2";
+    alternateLabel.setAttribute("x", alternateCentroid.x);
+    alternateLabel.setAttribute("y", alternateCentroid.y + 4);
+    alternateTriangle.classList.add("visible");
+    alternateTriangle.classList.toggle("selected", activeIndex === 1);
+  } else {
+    alternateTriangle.classList.remove("visible", "selected");
+    alternatePolygon.setAttribute("points", "");
+  }
+
   diagramDesc.textContent =
-    `A triangle with sides ${formatNumber(solution.a)}, ${formatNumber(solution.b)}, and ${formatNumber(solution.c)}.`;
+    `A triangle with sides ${formatNumber(solution.a)}, ${formatNumber(solution.b)}, and ${formatNumber(solution.c)}.${
+      alternateSolution ? " An alternate valid solution is nested inside it." : ""
+    }`;
   triangleStage.classList.add("solved");
 }
 
@@ -271,10 +336,9 @@ function renderResults(solutions, activeIndex = 0) {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.solution);
       renderResults(solutions, index);
-      renderDiagram(solutions[index]);
     });
   });
-  renderDiagram(solution);
+  renderDiagram(solutions[0], solutions[1] || null, activeIndex);
 }
 
 function resetApp() {
@@ -288,6 +352,10 @@ function resetApp() {
   statusBadge.classList.remove("solved");
   statusBadge.innerHTML = "<i></i> Waiting for values";
   triangleStage.classList.remove("solved");
+  alternateTriangle.classList.remove("visible", "selected");
+  alternatePolygon.setAttribute("points", "");
+  polygon.classList.remove("deemphasized");
+  labels.classList.remove("deemphasized");
   const defaults = [[122,340], [492,340], [335,90]];
   polygon.setAttribute("points", defaults.map((point) => point.join(",")).join(" "));
   defaults.forEach((point, index) => {
