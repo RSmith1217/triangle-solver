@@ -318,6 +318,10 @@ legend {
   stroke-width: 3.5;
   filter: drop-shadow(0 0 11px rgba(139, 108, 255, .85));
 }
+.alternate-triangle.selected #alternateVertex {
+  fill: #ad94ff;
+  stroke: #f0ecff;
+}
 .alternate-triangle.selected #alternateLabel { fill: #ded6ff; }
 #alternatePolygon {
   fill: rgba(139, 108, 255, .09);
@@ -327,6 +331,13 @@ legend {
   filter: drop-shadow(0 0 7px rgba(139, 108, 255, .45));
   vector-effect: non-scaling-stroke;
   transition: points .7s cubic-bezier(.22,.8,.24,1);
+}
+#alternateVertex {
+  fill: #090b20;
+  stroke: #ad94ff;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 7px rgba(139, 108, 255, .7));
+  transition: cx .7s, cy .7s;
 }
 #alternateLabel {
   fill: #c3b5ff;

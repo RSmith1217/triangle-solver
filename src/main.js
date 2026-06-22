@@ -7,6 +7,7 @@ const triangleStage = document.querySelector("#triangleStage");
 const polygon = document.querySelector("#trianglePolygon");
 const alternateTriangle = document.querySelector("#alternateTriangle");
 const alternatePolygon = document.querySelector("#alternatePolygon");
+const alternateVertex = document.querySelector("#alternateVertex");
 const alternateLabel = document.querySelector("#alternateLabel");
 const angleArcs = document.querySelector("#angleArcs");
 const labels = document.querySelector("#diagramLabels");
@@ -190,46 +191,59 @@ function svgText(text, x, y, className = "") {
   return node;
 }
 
-function nestedCoordinates(solution, primaryPoints) {
-  const points = triangleCoordinates(solution);
-  const primaryCentroid = {
-    x: (primaryPoints.A.x + primaryPoints.B.x + primaryPoints.C.x) / 3,
-    y: (primaryPoints.A.y + primaryPoints.B.y + primaryPoints.C.y) / 3
-  };
-  const ownCentroid = {
-    x: (points.A.x + points.B.x + points.C.x) / 3,
-    y: (points.A.y + points.B.y + points.C.y) / 3
-  };
-
-  const isInside = (point) => {
-    const { A, B, C } = primaryPoints;
-    const denominator = (B.y - C.y) * (A.x - C.x) + (C.x - B.x) * (A.y - C.y);
-    const alpha = ((B.y - C.y) * (point.x - C.x) + (C.x - B.x) * (point.y - C.y)) / denominator;
-    const beta = ((C.y - A.y) * (point.x - C.x) + (A.x - C.x) * (point.y - C.y)) / denominator;
-    const gamma = 1 - alpha - beta;
-    const margin = .035;
-    return alpha >= margin && beta >= margin && gamma >= margin;
-  };
-
-  const scaledPoints = (scale) => Object.fromEntries(
-    Object.entries(points).map(([key, point]) => [
-      key,
-      {
-        x: primaryCentroid.x + (point.x - ownCentroid.x) * scale,
-        y: primaryCentroid.y + (point.y - ownCentroid.y) * scale
-      }
-    ])
+function ambiguousCoordinates(primary, alternate) {
+  const angleKey = ["A", "B", "C"].find(
+    (key) => Math.abs(primary[key] - alternate[key]) < 1e-7
+  );
+  const varyingSide = ["a", "b", "c"].find(
+    (key) => Math.abs(primary[key] - alternate[key]) > 1e-7
+  );
+  const fixedAdjacentSide = ["a", "b", "c"].find(
+    (key) => key !== angleKey.toLowerCase() && key !== varyingSide
   );
 
-  for (let scale = .58; scale >= .12; scale -= .02) {
-    const candidate = scaledPoints(scale);
-    if (Object.values(candidate).every(isInside)) return candidate;
-  }
-  return scaledPoints(.1);
+  const angleVertex = angleKey;
+  const movingVertex = fixedAdjacentSide.toUpperCase();
+  const fixedVertex = varyingSide.toUpperCase();
+  const raw = (solution) => ({
+    [angleVertex]: { x: 0, y: 0 },
+    [fixedVertex]: { x: solution[fixedAdjacentSide], y: 0 },
+    [movingVertex]: {
+      x: solution[varyingSide] * Math.cos(toRad(solution[angleKey])),
+      y: solution[varyingSide] * Math.sin(toRad(solution[angleKey]))
+    }
+  });
+
+  const primaryRaw = raw(primary);
+  const alternateRaw = raw(alternate);
+  const allPoints = [...Object.values(primaryRaw), ...Object.values(alternateRaw)];
+  const xs = allPoints.map((point) => point.x);
+  const ys = allPoints.map((point) => point.y);
+  const width = Math.max(...xs) - Math.min(...xs);
+  const height = Math.max(...ys) - Math.min(...ys);
+  const scale = Math.min(410 / Math.max(width, 1e-9), 270 / Math.max(height, 1e-9));
+  const centerX = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const baseY = Math.min(...ys);
+  const fit = (points) => Object.fromEntries(Object.entries(points).map(([key, point]) => [
+    key,
+    {
+      x: 300 + (point.x - centerX) * scale,
+      y: 340 - (point.y - baseY) * scale
+    }
+  ]));
+
+  return {
+    primary: fit(primaryRaw),
+    alternate: fit(alternateRaw),
+    movingVertex
+  };
 }
 
 function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
-  const p = triangleCoordinates(solution);
+  const ambiguous = alternateSolution
+    ? ambiguousCoordinates(solution, alternateSolution)
+    : null;
+  const p = ambiguous ? ambiguous.primary : triangleCoordinates(solution);
   polygon.setAttribute("points", `${p.A.x},${p.A.y} ${p.B.x},${p.B.y} ${p.C.x},${p.C.y}`);
   polygon.classList.toggle("deemphasized", activeIndex === 1);
   labels.classList.toggle("deemphasized", activeIndex === 1);
@@ -276,11 +290,13 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
   });
 
   if (alternateSolution) {
-    const alternate = nestedCoordinates(alternateSolution, p);
+    const alternate = ambiguous.alternate;
     alternatePolygon.setAttribute(
       "points",
       `${alternate.A.x},${alternate.A.y} ${alternate.B.x},${alternate.B.y} ${alternate.C.x},${alternate.C.y}`
     );
+    alternateVertex.setAttribute("cx", alternate[ambiguous.movingVertex].x);
+    alternateVertex.setAttribute("cy", alternate[ambiguous.movingVertex].y);
     const alternateCentroid = {
       x: (alternate.A.x + alternate.B.x + alternate.C.x) / 3,
       y: (alternate.A.y + alternate.B.y + alternate.C.y) / 3
@@ -293,6 +309,8 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
   } else {
     alternateTriangle.classList.remove("visible", "selected");
     alternatePolygon.setAttribute("points", "");
+    alternateVertex.setAttribute("cx", 0);
+    alternateVertex.setAttribute("cy", 0);
   }
 
   diagramDesc.textContent =
@@ -354,6 +372,8 @@ function resetApp() {
   triangleStage.classList.remove("solved");
   alternateTriangle.classList.remove("visible", "selected");
   alternatePolygon.setAttribute("points", "");
+  alternateVertex.setAttribute("cx", 0);
+  alternateVertex.setAttribute("cy", 0);
   polygon.classList.remove("deemphasized");
   labels.classList.remove("deemphasized");
   const defaults = [[122,340], [492,340], [335,90]];
