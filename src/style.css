@@ -474,6 +474,89 @@ legend {
 .result-card.calculated.metric strong { color: var(--mint); }
 .method-line { margin: 13px 0 0; color: #7d86a8; font-size: .66rem; }
 .method-line b { color: var(--purple); }
+.solution-guide {
+  margin-top: 18px;
+  border: 1px solid rgba(139, 108, 255, .2);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(5, 7, 23, .36);
+}
+.solution-guide summary {
+  display: flex;
+  padding: 14px 16px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  color: #e8eaff;
+  background: linear-gradient(100deg, rgba(139,108,255,.1), rgba(61,220,255,.04));
+  cursor: pointer;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: .84rem;
+  font-weight: 700;
+  list-style: none;
+}
+.solution-guide summary::-webkit-details-marker { display: none; }
+.solution-guide summary::after {
+  color: var(--cyan);
+  content: "−";
+  font-size: 1.1rem;
+}
+.solution-guide:not([open]) summary::after { content: "+"; }
+.solution-guide summary span { display: flex; flex-direction: column; gap: 3px; }
+.solution-guide summary small {
+  color: var(--cyan);
+  font-family: "DM Sans", sans-serif;
+  font-size: .48rem;
+  letter-spacing: .14em;
+}
+.solution-guide summary b {
+  margin-left: auto;
+  color: #a99aff;
+  font-size: .6rem;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+.solution-guide ol {
+  display: grid;
+  margin: 0;
+  padding: 15px;
+  gap: 10px;
+  list-style: none;
+}
+.guide-step {
+  display: grid;
+  grid-template-columns: 27px minmax(0, 1fr);
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid rgba(158,170,255,.1);
+  border-radius: 10px;
+  background: rgba(9,11,31,.5);
+}
+.step-number {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid rgba(61,220,255,.25);
+  border-radius: 8px;
+  color: var(--cyan);
+  background: rgba(61,220,255,.06);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: .68rem;
+  font-weight: 700;
+}
+.guide-step h4 { margin: 1px 0 3px; color: #edf0ff; font-size: .73rem; }
+.guide-step p { margin: 0; color: #7f88aa; font-size: .63rem; line-height: 1.45; }
+.step-equation {
+  max-width: 100%;
+  margin-top: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: #dfe4ff;
+  font-size: .72rem;
+  scrollbar-width: thin;
+}
+.step-equation mjx-container { margin: 0 !important; }
 
 .learn-strip {
   display: grid;

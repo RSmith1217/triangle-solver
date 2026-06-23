@@ -203,6 +203,127 @@ function formatNumber(value) {
   return Number(value.toFixed(3)).toLocaleString(undefined, { maximumFractionDigits: 3 });
 }
 
+function equationStep(number, title, explanation, equation) {
+  return `<li class="guide-step">
+    <span class="step-number">${number}</span>
+    <div>
+      <h4>${title}</h4>
+      <p>${explanation}</p>
+      <div class="step-equation">\\(${equation}\\)</div>
+    </div>
+  </li>`;
+}
+
+function measurementSummary(solution) {
+  const semiperimeter = solution.perimeter / 2;
+  return {
+    perimeter: `P=${formatNumber(solution.a)}+${formatNumber(solution.b)}+${formatNumber(solution.c)}
+      =${formatNumber(solution.perimeter)}`,
+    heron: `s=\\frac{a+b+c}{2}=${formatNumber(semiperimeter)},\\qquad
+      K=\\sqrt{s(s-a)(s-b)(s-c)}=${formatNumber(solution.area)}`
+  };
+}
+
+function buildSolutionGuide(solution, solutions, activeIndex, givenValues, givenCase) {
+  const f = formatNumber;
+  const steps = [];
+  const summary = measurementSummary(solution);
+
+  if (givenCase.code === "SSS") {
+    steps.push(equationStep(1, "Find angle A", "Begin with the Law of Cosines.",
+      `A=\\cos^{-1}\\!\\left(\\frac{b^2+c^2-a^2}{2bc}\\right)
+      =\\cos^{-1}\\!\\left(\\frac{${f(solution.b)}^2+${f(solution.c)}^2-${f(solution.a)}^2}
+      {2(${f(solution.b)})(${f(solution.c)})}\\right)=${f(solution.A)}^\\circ`));
+    steps.push(equationStep(2, "Find angle B", "Apply the Law of Cosines again.",
+      `B=\\cos^{-1}\\!\\left(\\frac{a^2+c^2-b^2}{2ac}\\right)=${f(solution.B)}^\\circ`));
+    steps.push(equationStep(3, "Find angle C", "The interior angles total 180°.",
+      `C=180^\\circ-A-B=180^\\circ-${f(solution.A)}^\\circ-${f(solution.B)}^\\circ
+      =${f(solution.C)}^\\circ`));
+    steps.push(equationStep(4, "Find perimeter and area", "Use the perimeter and Heron’s Formula.",
+      `${summary.perimeter},\\qquad ${summary.heron}`));
+  } else if (givenCase.code === "SAS") {
+    const knownAngle = ["A", "B", "C"].find((key) => givenValues[key] !== null);
+    const missingSide = knownAngle.toLowerCase();
+    const adjacentSides = ["a", "b", "c"].filter((key) => key !== missingSide);
+    const unknownAngles = ["A", "B", "C"].filter((key) => key !== knownAngle);
+    const nextAngle = unknownAngles[0];
+    const nextSide = nextAngle.toLowerCase();
+    const nextAdjacent = ["a", "b", "c"].filter((key) => key !== nextSide);
+    const finalAngle = unknownAngles[1];
+
+    steps.push(equationStep(1, `Find side ${missingSide}`, "Use the Law of Cosines with the included angle.",
+      `${missingSide}=\\sqrt{${adjacentSides[0]}^2+${adjacentSides[1]}^2
+      -2(${adjacentSides[0]})(${adjacentSides[1]})\\cos ${knownAngle}}
+      =${f(solution[missingSide])}`));
+    steps.push(equationStep(2, `Find angle ${nextAngle}`, "Now that all three sides are known, use the Law of Cosines.",
+      `${nextAngle}=\\cos^{-1}\\!\\left(\\frac{${nextAdjacent[0]}^2+${nextAdjacent[1]}^2-${nextSide}^2}
+      {2(${nextAdjacent[0]})(${nextAdjacent[1]})}\\right)=${f(solution[nextAngle])}^\\circ`));
+    steps.push(equationStep(3, `Find angle ${finalAngle}`, "Subtract the two known angles from 180°.",
+      `${finalAngle}=180^\\circ-${knownAngle}-${nextAngle}=${f(solution[finalAngle])}^\\circ`));
+    steps.push(equationStep(4, "Find perimeter and area", "Use the two given sides and their included angle for area.",
+      `${summary.perimeter},\\qquad K=\\frac12(${adjacentSides[0]})(${adjacentSides[1]})
+      \\sin ${knownAngle}=${f(solution.area)}`));
+  } else if (givenCase.code === "SSA") {
+    const pairedSide = ["a", "b", "c"].find(
+      (side) => givenValues[side] !== null && givenValues[side.toUpperCase()] !== null
+    );
+    const pairedAngle = pairedSide.toUpperCase();
+    const otherSide = ["a", "b", "c"].find(
+      (side) => side !== pairedSide && givenValues[side] !== null
+    );
+    const otherAngle = otherSide.toUpperCase();
+    const finalAngle = ["A", "B", "C"].find(
+      (angle) => angle !== pairedAngle && angle !== otherAngle
+    );
+    const finalSide = finalAngle.toLowerCase();
+    const primaryAngle = solutions[0][otherAngle];
+    const branchEquation = activeIndex === 0
+      ? `${otherAngle}_1=\\sin^{-1}\\!\\left(\\frac{${otherSide}\\sin ${pairedAngle}}{${pairedSide}}\\right)
+        =${f(solution[otherAngle])}^\\circ`
+      : `${otherAngle}_2=180^\\circ-${f(primaryAngle)}^\\circ=${f(solution[otherAngle])}^\\circ`;
+
+    steps.push(equationStep(1, `Find angle ${otherAngle}`, "Use the Law of Sines. SSA may produce two possible angles.",
+      `\\frac{\\sin ${otherAngle}}{${otherSide}}=\\frac{\\sin ${pairedAngle}}{${pairedSide}},
+      \\qquad ${branchEquation}`));
+    steps.push(equationStep(2, `Find angle ${finalAngle}`, `This is solution ${activeIndex + 1} of ${solutions.length}.`,
+      `${finalAngle}=180^\\circ-${pairedAngle}-${otherAngle}=${f(solution[finalAngle])}^\\circ`));
+    steps.push(equationStep(3, `Find side ${finalSide}`, "Use the Law of Sines with the known opposite pair.",
+      `\\frac{${finalSide}}{\\sin ${finalAngle}}=\\frac{${pairedSide}}{\\sin ${pairedAngle}},
+      \\qquad ${finalSide}=\\frac{${pairedSide}\\sin ${finalAngle}}{\\sin ${pairedAngle}}
+      =${f(solution[finalSide])}`));
+    steps.push(equationStep(4, "Find perimeter and area", `Angle ${pairedAngle} is included between sides ${otherSide} and ${finalSide}.`,
+      `${summary.perimeter},\\qquad K=\\frac12(${otherSide})(${finalSide})\\sin ${pairedAngle}
+      =${f(solution.area)}`));
+  } else {
+    const missingAngle = ["A", "B", "C"].find((key) => givenValues[key] === null);
+    const knownAngles = ["A", "B", "C"].filter((key) => key !== missingAngle);
+    const knownSide = ["a", "b", "c"].find((key) => givenValues[key] !== null);
+    const knownOpposite = knownSide.toUpperCase();
+    const missingSides = ["a", "b", "c"].filter((key) => key !== knownSide);
+
+    steps.push(equationStep(1, `Find angle ${missingAngle}`, "The interior angles total 180°.",
+      `${missingAngle}=180^\\circ-${knownAngles[0]}-${knownAngles[1]}
+      =${f(solution[missingAngle])}^\\circ`));
+    missingSides.forEach((side, index) => {
+      const angle = side.toUpperCase();
+      steps.push(equationStep(index + 2, `Find side ${side}`, "Use the Law of Sines with the known opposite pair.",
+        `\\frac{${side}}{\\sin ${angle}}=\\frac{${knownSide}}{\\sin ${knownOpposite}},
+        \\qquad ${side}=\\frac{${knownSide}\\sin ${angle}}{\\sin ${knownOpposite}}
+        =${f(solution[side])}`));
+    });
+    steps.push(equationStep(4, "Find perimeter and area", "Finish with the perimeter and Heron’s Formula.",
+      `${summary.perimeter},\\qquad ${summary.heron}`));
+  }
+
+  return `<details class="solution-guide" open>
+    <summary>
+      <span><small>WORKED SOLUTION</small>Step-by-step guide</span>
+      <b>${givenCase.code}${solutions.length > 1 ? ` · Solution ${activeIndex + 1}` : ""}</b>
+    </summary>
+    <ol>${steps.join("")}</ol>
+  </details>`;
+}
+
 function triangleCoordinates(solution) {
   const raw = {
     A: { x: 0, y: 0 },
@@ -385,8 +506,11 @@ function renderDiagram(solution, alternateSolution = null, activeIndex = 0) {
   triangleStage.classList.add("solved");
 }
 
-function renderResults(solutions, activeIndex = 0, givenKeys = []) {
+function renderResults(solutions, activeIndex = 0, givenValues = {}, givenCase = { code: "" }) {
   const solution = solutions[activeIndex];
+  const givenKeys = Object.entries(givenValues)
+    .filter(([, value]) => value !== null)
+    .map(([key]) => key);
   const given = new Set(givenKeys);
   const tabs = solutions.length > 1
     ? `<div class="solution-tabs">${solutions.map((_, index) =>
@@ -416,14 +540,19 @@ function renderResults(solutions, activeIndex = 0, givenKeys = []) {
     </div>
     <p class="method-line"><b>Method:</b> ${solution.method}${
       solutions.length > 1 ? " · Two valid triangles were found." : ""
-    }</p>`;
+    }</p>
+    ${buildSolutionGuide(solution, solutions, activeIndex, givenValues, givenCase)}`;
 
   resultsSection.querySelectorAll("[data-solution]").forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.solution);
-      renderResults(solutions, index, givenKeys);
+      renderResults(solutions, index, givenValues, givenCase);
     });
   });
+  const guide = resultsSection.querySelector(".solution-guide");
+  if (guide && window.MathJax?.typesetPromise) {
+    window.MathJax.typesetPromise([guide]).catch(() => {});
+  }
   renderDiagram(solutions[0], solutions[1] || null, activeIndex);
 }
 
@@ -473,10 +602,7 @@ form.addEventListener("submit", (event) => {
   try {
     const givenCase = classifyGivenCase(values);
     const solutions = solveTriangle(values);
-    const givenKeys = Object.entries(values)
-      .filter(([, value]) => value !== null)
-      .map(([key]) => key);
-    renderResults(solutions, 0, givenKeys);
+    renderResults(solutions, 0, values, givenCase);
     caseBadge.querySelector("strong").textContent = givenCase.code;
     caseBadge.title = givenCase.description;
     caseBadge.hidden = false;
