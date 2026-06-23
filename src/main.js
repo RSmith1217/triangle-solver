@@ -3,6 +3,7 @@ const clearButton = document.querySelector("#clearButton");
 const formMessage = document.querySelector("#formMessage");
 const resultsSection = document.querySelector("#resultsSection");
 const statusBadge = document.querySelector("#statusBadge");
+const caseBadge = document.querySelector("#caseBadge");
 const triangleStage = document.querySelector("#triangleStage");
 const polygon = document.querySelector("#trianglePolygon");
 const alternateTriangle = document.querySelector("#alternateTriangle");
@@ -50,6 +51,28 @@ function validate(values) {
     return "The known angles must add to less than 180°.";
   }
   return "";
+}
+
+function classifyGivenCase(values) {
+  const sides = ["a", "b", "c"].filter((key) => values[key] !== null);
+  const angles = ["A", "B", "C"].filter((key) => values[key] !== null);
+
+  if (sides.length === 3) {
+    return { code: "SSS", description: "Three sides given" };
+  }
+  if (sides.length === 2) {
+    const knownAngle = angles[0];
+    const isIncluded = values[knownAngle.toLowerCase()] === null;
+    return isIncluded
+      ? { code: "SAS", description: "Two sides and the included angle given" }
+      : { code: "SSA", description: "Two sides and a non-included angle given" };
+  }
+
+  const knownSide = sides[0];
+  const missingAngle = ["A", "B", "C"].find((key) => values[key] === null);
+  return knownSide === missingAngle.toLowerCase()
+    ? { code: "ASA", description: "Two angles and the included side given" }
+    : { code: "AAS", description: "Two angles and a non-included side given" };
 }
 
 function solveSSS(v) {
@@ -397,6 +420,8 @@ function resetApp() {
   </div>`;
   statusBadge.classList.remove("solved");
   statusBadge.innerHTML = "<i></i> Waiting for values";
+  caseBadge.hidden = true;
+  caseBadge.removeAttribute("title");
   triangleStage.classList.remove("solved");
   alternateTriangle.classList.remove("visible", "selected");
   ambiguousAltitude.classList.remove("visible");
@@ -427,11 +452,15 @@ form.addEventListener("submit", (event) => {
     return;
   }
   try {
+    const givenCase = classifyGivenCase(values);
     const solutions = solveTriangle(values);
     const givenKeys = Object.entries(values)
       .filter(([, value]) => value !== null)
       .map(([key]) => key);
     renderResults(solutions, 0, givenKeys);
+    caseBadge.querySelector("strong").textContent = givenCase.code;
+    caseBadge.title = givenCase.description;
+    caseBadge.hidden = false;
     statusBadge.classList.add("solved");
     statusBadge.innerHTML = `<i></i> ${solutions.length > 1 ? "2 solutions found" : "Triangle solved"}`;
   } catch (solveError) {

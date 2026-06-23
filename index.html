@@ -44,14 +44,10 @@
         </a>
         <div class="hero-copy">
           <p class="eyebrow">Interactive Geometry Tool</p>
-          <h1>Every triangle has a <span>solution.</span></h1>
+          <h1>Triangle <span>Solver</span></h1>
           <p class="subtitle">
-            Enter any three known values—including at least one side—and watch the
-            triangle take shape.
+            Enter three values—including one side—to solve and visualize any triangle.
           </p>
-        </div>
-        <div class="rule-pills" aria-label="Supported triangle cases">
-          <span>SSS</span><span>SAS</span><span>ASA</span><span>AAS</span><span>SSA</span>
         </div>
       </header>
 
@@ -68,8 +64,7 @@
           </div>
 
           <p class="instruction">
-            Fill exactly three fields. Sides must be positive and angles must be
-            between 0° and 180°.
+            Enter exactly three values, including at least one side.
           </p>
 
           <form id="triangleForm" novalidate>
@@ -144,7 +139,13 @@
               <p class="kicker">02 / VISUALIZATION</p>
               <h2>Your triangle</h2>
             </div>
-            <span class="status-badge" id="statusBadge"><i></i> Waiting for values</span>
+            <div class="visual-badges">
+              <span class="case-badge" id="caseBadge" hidden>
+                <small>GIVEN CASE</small>
+                <strong>SSS</strong>
+              </span>
+              <span class="status-badge" id="statusBadge"><i></i> Waiting for values</span>
+            </div>
           </div>
 
           <div class="triangle-stage" id="triangleStage">

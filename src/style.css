@@ -84,7 +84,7 @@ button { color: inherit; }
 .brand-mark svg { width: 23px; fill: none; stroke: var(--cyan); stroke-width: 2; }
 .brand-mark circle { fill: var(--purple); stroke: none; }
 
-.hero-copy { max-width: 790px; margin: 40px auto 28px; }
+.hero-copy { max-width: 790px; margin: 40px auto 8px; }
 .eyebrow, .kicker {
   margin: 0 0 12px;
   color: var(--cyan);
@@ -113,18 +113,6 @@ h1 span {
   color: var(--muted);
   font-size: clamp(1rem, 1.6vw, 1.16rem);
   line-height: 1.7;
-}
-
-.rule-pills { display: flex; justify-content: center; gap: 9px; flex-wrap: wrap; }
-.rule-pills span {
-  padding: 7px 13px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: #aeb7db;
-  background: rgba(255,255,255,.025);
-  font-size: .67rem;
-  font-weight: 700;
-  letter-spacing: .12em;
 }
 
 .workspace {
@@ -252,6 +240,37 @@ legend {
 }
 
 .visual-heading { padding: 0 clamp(26px, 3vw, 42px) 22px; }
+.visual-badges {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.case-badge {
+  display: inline-flex;
+  min-height: 34px;
+  padding: 5px 11px;
+  border: 1px solid rgba(139, 108, 255, .35);
+  border-radius: 10px;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(139, 108, 255, .18), rgba(61, 220, 255, .08));
+  box-shadow: 0 0 20px rgba(139, 108, 255, .09);
+}
+.case-badge[hidden] { display: none; }
+.case-badge small {
+  color: #7e88ae;
+  font-size: .5rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.case-badge strong {
+  color: #c7baff;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: .82rem;
+  letter-spacing: .08em;
+}
 .status-badge {
   display: inline-flex;
   padding: 8px 11px;
