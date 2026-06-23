@@ -19,6 +19,7 @@ const labels = document.querySelector("#diagramLabels");
 const diagramDesc = document.querySelector("#diagramDesc");
 const vertices = ["A", "B", "C"].map((key) => document.querySelector(`#vertex${key}`));
 const fields = [...form.querySelectorAll("input")];
+const formulaCards = [...document.querySelectorAll("[data-formula]")];
 
 const toRad = (degrees) => (degrees * Math.PI) / 180;
 const toDeg = (radians) => (radians * 180) / Math.PI;
@@ -73,6 +74,22 @@ function classifyGivenCase(values) {
   return knownSide === missingAngle.toLowerCase()
     ? { code: "ASA", description: "Two angles and the included side given" }
     : { code: "AAS", description: "Two angles and a non-included side given" };
+}
+
+function highlightFirstStep(caseCode = "") {
+  const formula = ["SSS", "SAS"].includes(caseCode) ? "cosines"
+    : ["SSA", "ASA", "AAS"].includes(caseCode) ? "sines"
+    : "";
+
+  formulaCards.forEach((card) => {
+    const isFirstStep = card.dataset.formula === formula;
+    card.classList.toggle("first-step", isFirstStep);
+    if (isFirstStep) {
+      card.setAttribute("aria-label", `${card.querySelector(".formula-heading span").textContent}, used as the first step`);
+    } else {
+      card.removeAttribute("aria-label");
+    }
+  });
 }
 
 function solveSSS(v) {
@@ -422,6 +439,7 @@ function resetApp() {
   statusBadge.innerHTML = "<i></i> Waiting for values";
   caseBadge.hidden = true;
   caseBadge.removeAttribute("title");
+  highlightFirstStep();
   triangleStage.classList.remove("solved");
   alternateTriangle.classList.remove("visible", "selected");
   ambiguousAltitude.classList.remove("visible");
@@ -445,6 +463,7 @@ function resetApp() {
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   formMessage.textContent = "";
+  highlightFirstStep();
   const values = getValues();
   const error = validate(values);
   if (error) {
@@ -461,6 +480,7 @@ form.addEventListener("submit", (event) => {
     caseBadge.querySelector("strong").textContent = givenCase.code;
     caseBadge.title = givenCase.description;
     caseBadge.hidden = false;
+    highlightFirstStep(givenCase.code);
     statusBadge.classList.add("solved");
     statusBadge.innerHTML = `<i></i> ${solutions.length > 1 ? "2 solutions found" : "Triangle solved"}`;
   } catch (solveError) {

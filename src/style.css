@@ -492,9 +492,11 @@ legend {
 }
 .learn-strip h2 { max-width: 300px; }
 .formula-card {
+  position: relative;
   padding: 17px 20px;
   border-left: 2px solid var(--purple);
   background: linear-gradient(90deg, rgba(139,108,255,.07), transparent);
+  transition: border-color .25s, background .25s, box-shadow .25s, transform .25s;
 }
 .formula-card:nth-child(3),
 .formula-card:nth-child(5) {
@@ -505,7 +507,34 @@ legend {
   border-left-color: var(--mint);
   background: linear-gradient(90deg, rgba(36,225,173,.07), transparent);
 }
-.formula-card span { color: #7982a4; font-size: .6rem; font-weight: 700; letter-spacing: .13em; }
+.formula-heading {
+  display: flex;
+  min-height: 18px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.formula-heading span { color: #7982a4; font-size: .6rem; font-weight: 700; letter-spacing: .13em; }
+.formula-heading b {
+  display: none;
+  padding: 4px 7px;
+  border: 1px solid rgba(36, 225, 173, .3);
+  border-radius: 999px;
+  color: var(--mint);
+  background: rgba(36, 225, 173, .08);
+  font-size: .48rem;
+  letter-spacing: .11em;
+  white-space: nowrap;
+}
+.formula-card.first-step {
+  border-left-color: var(--mint);
+  background:
+    linear-gradient(105deg, rgba(36,225,173,.14), rgba(61,220,255,.07) 62%, transparent);
+  box-shadow: inset 0 0 24px rgba(36,225,173,.04), 0 0 28px rgba(36,225,173,.07);
+  transform: translateY(-1px);
+}
+.formula-card.first-step .formula-heading span { color: #c2f8e8; }
+.formula-card.first-step .formula-heading b { display: inline-flex; }
 .formula-card p {
   min-height: 32px;
   margin: 9px 0 0;
