@@ -356,19 +356,21 @@ function renderResults(solutions, activeIndex = 0, givenKeys = []) {
     : "";
 
   const cards = [
-    ["a", "Side a", solution.a, "units"],
-    ["b", "Side b", solution.b, "units"],
-    ["c", "Side c", solution.c, "units"],
-    ["A", "Angle A", solution.A, "°"],
-    ["B", "Angle B", solution.B, "°"],
-    ["C", "Angle C", solution.C, "°"],
+    ["a", "side a", solution.a, "units"],
+    ["b", "side b", solution.b, "units"],
+    ["c", "side c", solution.c, "units"],
     ["area", "Area", solution.area, "units²"],
+    ["A", "ANGLE A", solution.A, "°"],
+    ["B", "ANGLE B", solution.B, "°"],
+    ["C", "ANGLE C", solution.C, "°"],
     ["perimeter", "Perimeter", solution.perimeter, "units"]
   ];
 
   resultsSection.innerHTML = `${tabs}<div class="result-grid">
     ${cards.map(([key, label, value, unit]) =>
-      `<div class="result-card ${given.has(key) ? "given" : "calculated"}">
+      `<div class="result-card ${given.has(key) ? "given" : "calculated"} ${
+        key === "area" || key === "perimeter" ? "metric" : ""
+      }">
         <span>${label}</span><strong>${formatNumber(value)} <em>${unit}</em></strong>
       </div>`).join("")}
     </div>
