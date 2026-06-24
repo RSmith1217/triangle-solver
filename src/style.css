@@ -677,6 +677,10 @@ footer span { font-family: "Space Grotesk"; font-weight: 700; letter-spacing: .1
 footer p { margin: 0; }
 
 @media (max-width: 1040px) {
+  .site-cta {
+    padding: 0 20px;
+    font-size: .86rem;
+  }
   .workspace { grid-template-columns: 1fr; }
   .visual-panel { min-height: 700px; }
   .learn-strip { grid-template-columns: 1fr 1fr; }
@@ -687,7 +691,15 @@ footer p { margin: 0; }
   .app-shell { width: min(100% - 24px, 1500px); }
   .hero { padding-top: 138px; }
   .brand { top: 24px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
-  .site-cta { top: 76px; left: 50%; right: auto; transform: translateX(-50%); white-space: nowrap; }
+  .site-cta {
+    top: 76px;
+    left: 50%;
+    right: auto;
+    max-width: calc(100vw - 32px);
+    padding: 0 18px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
   .site-cta:hover { transform: translateX(-50%) translateY(-2px); }
   .hero-copy { margin-top: 22px; }
   .field-grid { grid-template-columns: 1fr; }
